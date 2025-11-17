@@ -1,0 +1,23 @@
+# === Archivos y carpetas generadas por NetBeans ===
+**/nbproject/private/
+**/nbproject/configs/
+**/dist/
+**/build/
+**/build-impl.xml
+
+# === Compilados ===
+*.class
+*.jar
+*.war
+*.ear
+
+# === Archivos temporales del sistema ===
+*.log
+*.out
+*.tmp
+*~
+.DS_Store
+Thumbs.db
+
+# === Configuración de IDE (opcional, para mantener limpio) ===
+*.swp
