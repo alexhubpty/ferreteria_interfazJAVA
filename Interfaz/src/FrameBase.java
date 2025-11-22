@@ -1,13 +1,16 @@
 /**
  * Clase FrameBase
  * Panel interno celeste con esquinas redondeadas y separación 40px.
+ * Fondo gris reemplazado por imagen escalada.
  */
 import java.awt.*;
 import javax.swing.*;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class FrameBase extends JFrame {
 
-  private JPanel contenedorPrincipal;
+  private ImagePanel contenedorPrincipal;
   private RoundedPanel panelFondo;
 
   public FrameBase(String titulo) {
@@ -30,16 +33,15 @@ public class FrameBase extends JFrame {
   }
 
   private void initComponents() {
-    contenedorPrincipal = new JPanel();
-    contenedorPrincipal.setBackground(new Color(230, 230, 230));
-    contenedorPrincipal.setLayout(null); // para posicionar manualmente
+    // Panel con imagen de fondo en lugar de color gris
+    contenedorPrincipal = new ImagePanel("/resources/imagenes/fondo.jpg");
+    contenedorPrincipal.setLayout(null);
 
-    panelFondo = new RoundedPanel(60, new Color(229, 240, 250)); // arco 80
+    panelFondo = new RoundedPanel(60, new Color(229, 240, 250));
     panelFondo.setLayout(new BorderLayout());
 
     contenedorPrincipal.add(panelFondo);
 
-    // Ajuste inicial y en cada resize
     contenedorPrincipal.addComponentListener(new java.awt.event.ComponentAdapter() {
       @Override
       public void componentResized(java.awt.event.ComponentEvent e) {
@@ -79,13 +81,42 @@ public class FrameBase extends JFrame {
   }
 
   private void cargarVistaInicial() {
-    JLabel etiqueta =
-        new JLabel("Cargando formulario de Login...", SwingConstants.CENTER);
-    panelFondo.add(etiqueta, BorderLayout.CENTER);
+    // Cambiar según la vista que quieres probar:
+    setContenido(new LoginFrame());
+    //setContenido(new VentaFrame());
+    //setContenido(new ResumenFacturaFrame());
   }
 
   public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> new FrameBase("Ferretería El Polaco - Base"));
+  }
+}
+
+/**
+ * Panel con imagen de fondo escalada.
+ */
+class ImagePanel extends JPanel {
+  private Image imagen;
+
+  public ImagePanel(String rutaImagen) {
+    try {
+      imagen = ImageIO.read(getClass().getResourceAsStream(rutaImagen));
+    } catch (IOException | IllegalArgumentException e) {
+      System.err.println("No se pudo cargar la imagen: " + rutaImagen);
+      setBackground(new Color(230, 230, 230)); // Fallback al gris
+    }
+  }
+
+  @Override
+  protected void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    if (imagen != null) {
+      Graphics2D g2 = (Graphics2D) g.create();
+      g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, 
+                          RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+      g2.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
+      g2.dispose();
+    }
   }
 }
 
