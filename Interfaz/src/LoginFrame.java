@@ -5,7 +5,7 @@ import java.awt.event.*;
 import java.awt.image.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.AbstractBorder;
+// import javax.swing.border.AbstractBorder;
 import javax.swing.text.JTextComponent;
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -174,16 +174,16 @@ public class LoginFrame extends JPanel {
   }
 
   private JTextField crearTextFieldConPlaceholder(String placeholder) {
-    JTextField t = new RoundedTextField(500, 70, 20, new Color(215,216,220), new Color(150,150,150));
+    JTextField t = new RoundedTextField(500, 70, 20, new Color(215,216,220), new Color(215,216,220));
     aplicarPlaceholder(t, placeholder, false);
-    t.setFont(new Font("SansSerif", Font.PLAIN, 22));
+    t.setFont(new Font("SansSerif", Font.PLAIN, 24));
     return t;
   }
 
   private JPasswordField crearPasswordFieldConPlaceholder(String placeholder) {
-    JPasswordField p = new RoundedPasswordField(500, 70, 20, new Color(215,216,220), new Color(150,150,150));
+    JPasswordField p = new RoundedPasswordField(500, 70, 20, new Color(215,216,220), new Color(215,216,220));
     aplicarPlaceholder(p, placeholder, true);
-    p.setFont(new Font("SansSerif", Font.PLAIN, 22));
+    p.setFont(new Font("SansSerif", Font.PLAIN, 24));
     return p;
   }
 
