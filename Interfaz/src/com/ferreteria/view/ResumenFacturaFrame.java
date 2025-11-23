@@ -1,9 +1,13 @@
+package com.ferreteria.view;
+
 /**
  * ResumenFacturaFrame - Resumen de factura antes de confirmar
  * Panel rojo con subtotales y totales
  */
 import java.awt.*;
 import javax.swing.*;
+
+import com.ferreteria.view.RoundedPanel;
 
 public class ResumenFacturaFrame extends JPanel {
   private RoundedPanel panelRojo;
@@ -35,7 +39,7 @@ public class ResumenFacturaFrame extends JPanel {
     // Subtotal
     crearCampoResumen("Subtotal", 100, 1);
     lblSubtotal = crearValorResumen("$ 0.00", 100);
-    
+
     // ITBMS 7%
     crearCampoResumen("ITBMS 7%", 160, 1);
     lblITBMS = crearValorResumen("$ 0.00", 160);
@@ -55,7 +59,7 @@ public class ResumenFacturaFrame extends JPanel {
 
     // Pago
     crearCampoResumen("Pago", 340, 2);
-    
+
     // Cambio
     JLabel lblCambioLabel = new JLabel("Cambio:", SwingConstants.LEFT);
     lblCambioLabel.setForeground(Color.WHITE);

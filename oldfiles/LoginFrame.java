@@ -1,15 +1,32 @@
-//LoginFrame - Interfaz visual de Login con imagen de fondo blur en panel rojo.
 
+// MODIFICADO PARA MVC
+// Añadidos métodos getUsername(), getPassword(), setControlador(), etc.
+// Conexión de eventos de botones al controlador
+// Autor: TÚ (Frontend)
+// oldfiles/LoginFrame.java
+
+package com.ferreteria.view;
+
+import com.ferreteria.controller.ControladorLogin;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-// import javax.swing.border.AbstractBorder;
 import javax.swing.text.JTextComponent;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 
+/**
+ * Vista de Login - Interfaz gráfica
+ * 
+ * @author TÚ (Frontend)
+ * 
+ *         MODIFICACIONES NECESARIAS PARA MVC:
+ *         - Añadir métodos getUsername() y getPassword()
+ *         - Añadir método setControlador()
+ *         - Conectar eventos de botones al controlador
+ */
 public class LoginFrame extends JPanel {
   private ImageRoundedPanel panelRojo;
   private JPanel panelFormulario;
@@ -18,11 +35,90 @@ public class LoginFrame extends JPanel {
   private JButton botonAcceder;
   private JButton botonCerrar;
 
+  // NUEVO: Referencia al controlador
+  private ControladorLogin controlador;
+
   public LoginFrame() {
     setOpaque(false);
     setLayout(new BorderLayout());
     initComponents();
   }
+
+  // NUEVO: Método para inyectar el controlador
+  public void setControlador(ControladorLogin controlador) {
+    this.controlador = controlador;
+    configurarEventos();
+  }
+
+  // NUEVO: Configurar eventos de botones
+  private void configurarEventos() {
+    botonAcceder.addActionListener(e -> {
+      if (controlador != null) {
+        controlador.intentarLogin();
+      }
+    });
+
+    botonCerrar.addActionListener(e -> {
+      if (controlador != null) {
+        controlador.cerrarAplicacion();
+      }
+    });
+
+    // Enter en password ejecuta login
+    campoContrasena.addActionListener(e -> {
+      if (controlador != null) {
+        controlador.intentarLogin();
+      }
+    });
+  }
+
+  // NUEVO: Métodos públicos para que el controlador acceda a los datos
+  public String getUsername() {
+    String texto = campoUsuario.getText();
+    // Evitar retornar el placeholder
+    if (texto.equals("felix123ok")) {
+      return "";
+    }
+    return texto;
+  }
+
+  public String getPassword() {
+    String texto = new String(campoContrasena.getPassword());
+    // Evitar retornar el placeholder
+    if (texto.equals("******")) {
+      return "";
+    }
+    return texto;
+  }
+
+  // NUEVO: Métodos para interactuar con la vista desde el controlador
+  public void mostrarError(String mensaje) {
+    JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+  }
+
+  public void mostrarMensaje(String mensaje) {
+    JOptionPane.showMessageDialog(this, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  public void limpiarCampos() {
+    campoUsuario.setText("");
+    campoContrasena.setText("");
+  }
+
+  public void setLoginEnProceso(boolean enProceso) {
+    botonAcceder.setEnabled(!enProceso);
+    campoUsuario.setEnabled(!enProceso);
+    campoContrasena.setEnabled(!enProceso);
+    if (enProceso) {
+      botonAcceder.setText("Validando...");
+    } else {
+      botonAcceder.setText("Acceder");
+    }
+  }
+
+  // ... resto del código existente de initComponents(), crearPanelFormulario(),
+  // etc.
+  // (TODO EL CÓDIGO QUE YA TIENES SE MANTIENE IGUAL)
 
   private void initComponents() {
     JPanel inner = new JPanel(new GridBagLayout());
@@ -34,7 +130,6 @@ public class LoginFrame extends JPanel {
     gbc.gridy = 0;
     gbc.fill = GridBagConstraints.BOTH;
     gbc.weighty = 1.0;
-
     // PANEL FORMULARIO (IZQUIERDA) - 35% del ancho
     panelFormulario = crearPanelFormulario();
     gbc.gridx = 0;
@@ -54,7 +149,7 @@ public class LoginFrame extends JPanel {
     JLabel marca1 = new JLabel("Ferretería");
     marca1.setFont(new Font("SansSerif", Font.PLAIN, 36));
     marca1.setForeground(Color.WHITE);
-    
+
     JLabel marca2 = new JLabel("El Polaco");
     marca2.setFont(new Font("SansSerif", Font.BOLD, 40));
     marca2.setForeground(Color.WHITE);
@@ -90,7 +185,7 @@ public class LoginFrame extends JPanel {
     JPanel top = new JPanel();
     top.setOpaque(false);
     top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
-    
+
     // Botón cerrar
     JPanel closePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     closePanel.setOpaque(false);
@@ -98,9 +193,9 @@ public class LoginFrame extends JPanel {
     botonCerrar = crearBotonCircularCerrar();
     closePanel.add(botonCerrar);
     top.add(closePanel);
-    top.add(Box.createVerticalStrut(80));
+    top.add(Box.createVerticalStrut(16));
 
-    // Título Login - centrado
+    // Título y subtítulo
     JLabel lblTitulo = new JLabel("Login", SwingConstants.CENTER);
     lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 50));
     lblTitulo.setForeground(new Color(20, 20, 20));
@@ -109,7 +204,7 @@ public class LoginFrame extends JPanel {
     top.add(lblTitulo);
     top.add(Box.createVerticalStrut(50));
 
-    // Subtítulo - centrado
+    // Subtítulo
     JLabel lblSub = new JLabel("Introduce tus credenciales", SwingConstants.CENTER);
     lblSub.setFont(new Font("SansSerif", Font.PLAIN, 26));
     lblSub.setForeground(new Color(60, 60, 60));
@@ -120,14 +215,16 @@ public class LoginFrame extends JPanel {
     p.add(top, BorderLayout.NORTH);
 
     // Formulario - alineado a la izquierda
+    // JPanel formWrapper = new JPanel(new GridBagLayout());
     JPanel formWrapper = new JPanel();
     formWrapper.setOpaque(false);
     formWrapper.setLayout(new GridBagLayout());
-    
+
+    // Formulario
     JPanel form = new JPanel();
     form.setOpaque(false);
     form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-    
+
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridx = 0;
     gbc.gridy = 0;
@@ -150,18 +247,40 @@ public class LoginFrame extends JPanel {
     form.add(botonAcceder);
 
     // para dimensionar bien los campos password y text
+    // Alinear todos los componentes del formulario a la izquierda
+    // dimensiones máximas para campos de texto y botones
 
     for (Component c : form.getComponents()) {
-     if (c instanceof JComponent jc) {
-    jc.setAlignmentX(Component.LEFT_ALIGNMENT);
-    
-    Dimension d = jc.getPreferredSize();
-    jc.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-  }
-}
+      if (c instanceof JComponent jc) {
+        jc.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        Dimension d = jc.getPreferredSize();
+        jc.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+      }
+    }
 
     formWrapper.add(form, gbc);
     p.add(formWrapper, BorderLayout.CENTER);
+
+    // Ajustar tamaños al redimensionar
+    // que el ancho máximo de los campos y botones sea 55% del panel
+
+    // p.addComponentListener(new ComponentAdapter() {
+    // @Override
+    // public void componentResized(ComponentEvent e) {
+    // int usable = p.getWidth();
+    // int target = Math.min(480, (int) (usable * 0.55));
+    // for (Component comp : form.getComponents()) {
+    // if (comp instanceof JTextComponent || comp == botonAcceder) {
+    // Dimension d = comp.getPreferredSize();
+    // comp.setPreferredSize(new Dimension(target, d.height));
+    // comp.setMaximumSize(new Dimension(target, d.height));
+    // }
+    // }
+    // form.revalidate();
+    // }
+    // });
+
     return p;
   }
 
@@ -174,14 +293,14 @@ public class LoginFrame extends JPanel {
   }
 
   private JTextField crearTextFieldConPlaceholder(String placeholder) {
-    JTextField t = new RoundedTextField(500, 70, 20, new Color(215,216,220), new Color(215,216,220));
+    JTextField t = new RoundedTextField(500, 70, 20, new Color(215, 216, 220));
     aplicarPlaceholder(t, placeholder, false);
     t.setFont(new Font("SansSerif", Font.PLAIN, 24));
     return t;
   }
 
   private JPasswordField crearPasswordFieldConPlaceholder(String placeholder) {
-    JPasswordField p = new RoundedPasswordField(500, 70, 20, new Color(215,216,220), new Color(215,216,220));
+    JPasswordField p = new RoundedPasswordField(500, 70, 20, new Color(215, 216, 220));
     aplicarPlaceholder(p, placeholder, true);
     p.setFont(new Font("SansSerif", Font.PLAIN, 24));
     return p;
@@ -192,27 +311,31 @@ public class LoginFrame extends JPanel {
     Color activeColor = new Color(30, 30, 30);
     c.setText(text);
     c.setForeground(placeholderColor);
-    
+
     c.addFocusListener(new FocusAdapter() {
       @Override
       public void focusGained(FocusEvent e) {
         if (c.getForeground().equals(placeholderColor)) {
           c.setText("");
           c.setForeground(activeColor);
-          if (password && c instanceof JPasswordField jf) jf.setEchoChar('•');
+          if (password && c instanceof JPasswordField jf)
+            jf.setEchoChar('•');
         }
       }
+
       @Override
       public void focusLost(FocusEvent e) {
         if (c.getText().isEmpty()) {
           c.setForeground(placeholderColor);
           c.setText(text);
-          if (password && c instanceof JPasswordField jf) jf.setEchoChar((char) 0);
+          if (password && c instanceof JPasswordField jf)
+            jf.setEchoChar((char) 0);
         }
       }
     });
-    
-    if (password && c instanceof JPasswordField jf) jf.setEchoChar((char) 0);
+
+    if (password && c instanceof JPasswordField jf)
+      jf.setEchoChar((char) 0);
   }
 
   private JButton crearBotonAcceder() {
@@ -226,6 +349,7 @@ public class LoginFrame extends JPanel {
         g2.dispose();
         super.paintComponent(g);
       }
+
       @Override
       public Dimension getPreferredSize() {
         return new Dimension(300, 60);
@@ -239,20 +363,21 @@ public class LoginFrame extends JPanel {
     b.setContentAreaFilled(false);
     b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     b.setAlignmentX(Component.LEFT_ALIGNMENT);
-    
+
     b.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseEntered(MouseEvent e) {
         b.setBackground(new Color(90, 120, 90));
         b.repaint();
       }
+
       @Override
       public void mouseExited(MouseEvent e) {
         b.setBackground(new Color(45, 45, 45));
         b.repaint();
       }
     });
-    
+
     return b;
   }
 
@@ -267,24 +392,25 @@ public class LoginFrame extends JPanel {
     b.setContentAreaFilled(false);
     b.setPreferredSize(new Dimension(48, 48));
     b.setMaximumSize(new Dimension(48, 48));
-    
+
     b.addMouseListener(new MouseAdapter() {
-      @Override 
-      public void mouseEntered(MouseEvent e) { 
-        b.setForeground(Color.WHITE); 
-        b.setBackground(new Color(60, 60, 60)); 
-        b.repaint(); 
+      @Override
+      public void mouseEntered(MouseEvent e) {
+        b.setForeground(Color.WHITE);
+        b.setBackground(new Color(60, 60, 60));
+        b.repaint();
       }
-      @Override 
-      public void mouseExited(MouseEvent e) { 
-        b.setForeground(new Color(70, 70, 70)); 
-        b.setBackground(new Color(210, 210, 210)); 
-        b.repaint(); 
+
+      @Override
+      public void mouseExited(MouseEvent e) {
+        b.setForeground(new Color(70, 70, 70));
+        b.setBackground(new Color(210, 210, 210));
+        b.repaint();
       }
     });
-    
+
     b.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
-      @Override 
+      @Override
       public void paint(Graphics g, JComponent c) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -301,21 +427,19 @@ public class LoginFrame extends JPanel {
     return b;
   }
 
-
-private static class RoundedTextField extends JTextField {
+  private static class RoundedTextField extends JTextField {
     private final int prefW, prefH, radius;
     private final Color bg;
-    private final Color borderColor;
 
-    public RoundedTextField(int prefW, int prefH, int radius, Color bg, Color borderColor) {
+    public RoundedTextField(int prefW, int prefH, int radius, Color bg) {
       this.prefW = prefW;
       this.prefH = prefH;
       this.radius = radius;
       this.bg = bg;
-      this.borderColor = borderColor;
       setOpaque(false);
-      setForeground(new Color(130,130,130));
-      setBorder(BorderFactory.createEmptyBorder(12,18,12,18)); // padding interno
+      setForeground(new Color(130, 130, 130));
+      // setFont(new Font("SansSerif", Font.PLAIN, 18));
+      setBorder(BorderFactory.createEmptyBorder(12, 18, 12, 18));
     }
 
     @Override
@@ -328,36 +452,28 @@ private static class RoundedTextField extends JTextField {
       Graphics2D g2 = (Graphics2D) g.create();
       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
       g2.setColor(bg);
-      g2.fillRoundRect(0,0,getWidth(),getHeight(),radius,radius);
+      g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
       super.paintComponent(g2);
       g2.dispose();
     }
 
     @Override
     protected void paintBorder(Graphics g) {
-      Graphics2D g2 = (Graphics2D) g.create();
-      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      g2.setColor(borderColor);
-      g2.setStroke(new BasicStroke(2f));
-      g2.drawRoundRect(1,1,getWidth()-3,getHeight()-3,radius,radius);
-      g2.dispose();
     }
   }
 
   private static class RoundedPasswordField extends JPasswordField {
     private final int prefW, prefH, radius;
     private final Color bg;
-    private final Color borderColor;
 
-    public RoundedPasswordField(int prefW, int prefH, int radius, Color bg, Color borderColor) {
+    public RoundedPasswordField(int prefW, int prefH, int radius, Color bg) {
       this.prefW = prefW;
       this.prefH = prefH;
       this.radius = radius;
       this.bg = bg;
-      this.borderColor = borderColor;
       setOpaque(false);
-      setForeground(new Color(130,130,130));
-      setBorder(BorderFactory.createEmptyBorder(12,18,12,18));
+      setForeground(new Color(130, 130, 130));
+      setBorder(BorderFactory.createEmptyBorder(12, 18, 12, 18));
     }
 
     @Override
@@ -370,24 +486,16 @@ private static class RoundedTextField extends JTextField {
       Graphics2D g2 = (Graphics2D) g.create();
       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
       g2.setColor(bg);
-      g2.fillRoundRect(0,0,getWidth(),getHeight(),radius,radius);
+      g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
       super.paintComponent(g2);
       g2.dispose();
     }
 
     @Override
     protected void paintBorder(Graphics g) {
-      Graphics2D g2 = (Graphics2D) g.create();
-      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      g2.setColor(borderColor);
-      g2.setStroke(new BasicStroke(2f));
-      g2.drawRoundRect(1,1,getWidth()-3,getHeight()-3,radius,radius);
-      g2.dispose();
     }
   }
 
-  // Panel redondeado con imagen de fondo blur y overlay de color.
-   
   private static class ImageRoundedPanel extends JPanel {
     private final int arc;
     private final Color overlayColor;
@@ -414,14 +522,14 @@ private static class RoundedTextField extends JTextField {
       int w = img.getWidth();
       int h = img.getHeight();
       BufferedImage blurred = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-      
-      // Aplicar GaussianBlur usando ConvolveOp
+
+      // aplicar convolución de desenfoque gaussiano
       float weight = 1.0f / (radius * radius);
       float[] data = new float[radius * radius];
       for (int i = 0; i < data.length; i++) {
         data[i] = weight;
       }
-      
+
       Kernel kernel = new Kernel(radius, radius, data);
       ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
       return op.filter(img, blurred);
@@ -433,10 +541,9 @@ private static class RoundedTextField extends JTextField {
       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
       g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
-      // Clip redondeado
+      // Recortar a bordes redondeados
       g2.setClip(new java.awt.geom.RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), arc, arc));
 
-      // Dibujar imagen blur escalada y recortada (cover)
       if (imagenBlur != null) {
         int imgW = imagenBlur.getWidth();
         int imgH = imagenBlur.getHeight();
@@ -452,9 +559,9 @@ private static class RoundedTextField extends JTextField {
         g2.drawImage(imagenBlur, x, y, scaledW, scaledH, null);
       }
 
-      // Overlay de color semitransparente
-      g2.setColor(new Color(overlayColor.getRed(), overlayColor.getGreen(), 
-                            overlayColor.getBlue(), 180)); // 70% opacidad
+      // Overlay semitransparente
+      g2.setColor(new Color(overlayColor.getRed(), overlayColor.getGreen(),
+          overlayColor.getBlue(), 180));
       g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
 
       g2.dispose();
