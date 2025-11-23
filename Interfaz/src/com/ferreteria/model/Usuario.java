@@ -4,10 +4,12 @@ package com.ferreteria.model;
  * POJO Usuario - Representa un usuario del sistema
  * 
  * @author Alex (Backend)
- * INSTRUCCIONES PARA ALEX:
- * - Esta clase ya está completa, solo úsala como referencia
- * - Cada atributo debe tener getter y setter
- * - Incluye constructor vacío y constructor con parámetros
+ * 
+ *         TODO INSTRUCCIONES PARA ALEX:
+ *         Completa esta clase según las especificaciones:
+ *         - Esta clase ya está completa, solo úsala como referencia
+ *         - Cada atributo debe tener getter y setter
+ *         - Incluye constructor vacío y constructor con parámetros
  */
 public class Usuario {
     private int id;

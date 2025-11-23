@@ -2,9 +2,12 @@ package com.ferreteria;
 
 import com.ferreteria.controller.ControladorLogin;
 import com.ferreteria.database.DatabaseConnection;
+// import com.ferreteria.model.Venta;
 import com.ferreteria.view.LoginFrame;
+import com.ferreteria.view.ResumenFacturaFrame;
+import com.ferreteria.view.VentaFrame;
 import javax.swing.*;
-import java.awt.*;
+// import java.awt.*;
 
 /**
  * Clase principal - Arranca la aplicación
@@ -60,15 +63,20 @@ public class Main {
         // Crear ventana principal (tu FrameBase existente)
         FrameBase frameBase = new FrameBase("Ferretería El Polaco - Sistema de Ventas");
 
-        // Crear vista de login
+        // Crear vistas de la aplicación
+        // login, venta, resumen factura
         LoginFrame vistaLogin = new LoginFrame();
+        // VentaFrame vistaVenta = new VentaFrame();
+        // ResumenFacturaFrame vistaResumen = new ResumenFacturaFrame();
 
         // Crear controlador y conectarlo con la vista
         ControladorLogin controladorLogin = new ControladorLogin(vistaLogin);
         vistaLogin.setControlador(controladorLogin);
 
-        // Mostrar login en el FrameBase
+        // Mostrar vistas en el FrameBase
+        // frameBase.setContenido(vistaVenta);
         frameBase.setContenido(vistaLogin);
+        // frameBase.setContenido(vistaResumen);
 
         System.out.println("✓ Aplicación iniciada correctamente");
         System.out.println("  Esperando autenticación...");

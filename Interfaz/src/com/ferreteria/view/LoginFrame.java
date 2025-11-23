@@ -113,7 +113,6 @@ public class LoginFrame extends JPanel {
 
   // ... resto del código existente de initComponents(), crearPanelFormulario(),
   // etc.
-  // (TODO EL CÓDIGO QUE YA TIENES SE MANTIENE IGUAL)
 
   private void initComponents() {
     JPanel inner = new JPanel(new GridBagLayout());

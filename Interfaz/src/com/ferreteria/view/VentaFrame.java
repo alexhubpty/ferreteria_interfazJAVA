@@ -7,11 +7,12 @@ package com.ferreteria.view;
 import java.awt.*;
 import javax.swing.*;
 
-import com.ferreteria.view.RoundedPanel;
+// import com.ferreteria.util.ImagePanel;
+import com.ferreteria.util.RoundedPanel;
 
 public class VentaFrame extends JPanel {
   private RoundedPanel panelRojo;
-  private JTextField campoCodigoProducto;
+  // private JTextField campoCodigoProducto;
   private JComboBox<String> comboBloques;
   private JTextField campoNumeroBloques;
   private JTextField campoTamano;

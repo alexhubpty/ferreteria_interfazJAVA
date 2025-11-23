@@ -7,7 +7,8 @@ package com.ferreteria.view;
 import java.awt.*;
 import javax.swing.*;
 
-import com.ferreteria.view.RoundedPanel;
+// import com.ferreteria.util.ImagePanel;
+import com.ferreteria.util.RoundedPanel;
 
 public class ResumenFacturaFrame extends JPanel {
   private RoundedPanel panelRojo;

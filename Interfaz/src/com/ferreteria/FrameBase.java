@@ -10,8 +10,12 @@ import javax.swing.*;
 
 import com.ferreteria.view.LoginFrame;
 
-import java.io.IOException;
-import javax.imageio.ImageIO;
+// importaciones de utilidades reutilizables
+import com.ferreteria.util.RoundedPanel;
+import com.ferreteria.util.ImagePanel;
+
+// import java.io.IOException;
+// import javax.imageio.ImageIO;
 
 public class FrameBase extends JFrame {
 
@@ -98,56 +102,4 @@ public class FrameBase extends JFrame {
     SwingUtilities.invokeLater(() -> new FrameBase("Ferretería El Polaco - Base"));
   }
 
-}
-
-/**
- * Panel con imagen de fondo escalada.
- */
-class ImagePanel extends JPanel {
-  private Image imagen;
-
-  public ImagePanel(String rutaImagen) {
-    try {
-      imagen = ImageIO.read(getClass().getResourceAsStream(rutaImagen));
-    } catch (IOException | IllegalArgumentException e) {
-      System.err.println("No se pudo cargar la imagen: " + rutaImagen);
-      setBackground(new Color(230, 230, 230));
-    }
-  }
-
-  @Override
-  protected void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    if (imagen != null) {
-      Graphics2D g2 = (Graphics2D) g.create();
-      g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-          RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-      g2.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
-      g2.dispose();
-    }
-  }
-}
-
-/**
- * Panel redondeado que pinta su fondo con antialias.
- */
-class RoundedPanel extends JPanel {
-  private final int arc;
-  private final Color fill;
-
-  public RoundedPanel(int arc, Color fill) {
-    this.arc = arc;
-    this.fill = fill;
-    setOpaque(false);
-  }
-
-  @Override
-  protected void paintComponent(Graphics g) {
-    Graphics2D g2 = (Graphics2D) g.create();
-    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2.setColor(fill);
-    g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
-    g2.dispose();
-    super.paintComponent(g);
-  }
 }
