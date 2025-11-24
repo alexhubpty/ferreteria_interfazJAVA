@@ -1,3 +1,5 @@
+package com.ferreteria.view;
+
 /**
  * VentaFrame - Pantalla de nueva venta
  * Panel rojo más ancho a la derecha con campos de venta
@@ -5,9 +7,12 @@
 import java.awt.*;
 import javax.swing.*;
 
+// import com.ferreteria.util.ImagePanel;
+import com.ferreteria.util.RoundedPanel;
+
 public class VentaFrame extends JPanel {
   private RoundedPanel panelRojo;
-  private JTextField campoCodigoProducto;
+  // private JTextField campoCodigoProducto;
   private JComboBox<String> comboBloques;
   private JTextField campoNumeroBloques;
   private JTextField campoTamano;
@@ -45,7 +50,7 @@ public class VentaFrame extends JPanel {
     lblBloques.setBounds(50, 110, 120, 25);
     panelRojo.add(lblBloques);
 
-    comboBloques = new JComboBox<>(new String[]{"Precio", "Bloques"});
+    comboBloques = new JComboBox<>(new String[] { "Precio", "Bloques" });
     comboBloques.setBounds(170, 110, 230, 30);
     panelRojo.add(comboBloques);
 
