@@ -9,6 +9,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import com.ferreteria.controller.ControladorLogin;
+
 // import org.w3c.dom.events.MouseEvent;
 
 // import com.ferreteria.util.ImagePanel;
@@ -25,11 +27,57 @@ public class MenuFrame extends JPanel {
     private JTextField campoTamano;
     private JTextField campoPrecio;
     private JButton botonAgregar;
+    private ControladorLogin controlador;
 
     public MenuFrame() {
         setLayout(new BorderLayout());
         setOpaque(false);
         initComponents();
+    }
+
+    public void setControlador(ControladorLogin controlador) {
+        this.controlador = controlador;
+        configurarEventos();
+    }
+
+    // NUEVO: Configurar eventos de botones
+    private void configurarEventos() {
+        // botonAcceder.addActionListener(e -> {
+        // if (controlador != null) {
+        // controlador.intentarLogin();
+        // }
+        // });
+
+        botonCerrar.addActionListener(e -> {
+            if (controlador != null) {
+                controlador.cerrarAplicacion();
+            }
+        });
+
+        botonNVenta.addActionListener(e -> {
+            if (controlador != null) {
+                controlador.cerrarAplicacion();
+            }
+        });
+
+        botonNPago.addActionListener(e -> {
+            if (controlador != null) {
+                controlador.cerrarAplicacion();
+            }
+        });
+
+        botonIVentas.addActionListener(e -> {
+            if (controlador != null) {
+                controlador.cerrarAplicacion();
+            }
+        });
+
+        // Enter en password ejecuta login
+        // campoContrasena.addActionListener(e -> {
+        // if (controlador != null) {
+        // controlador.intentarLogin();
+        // }
+        // });
     }
 
     private void initComponents() {
@@ -80,7 +128,7 @@ public class MenuFrame extends JPanel {
         top.add(closePanel);
         top.add(Box.createVerticalStrut(100));
 
-        // Botones para cambiar de vistas
+        // Botones para cambiar de vistas # falta crear los botones
         JLabel lblVenta = new JLabel("Nueva Venta", SwingConstants.LEFT);
         lblVenta.setFont(new Font("SansSerif", Font.BOLD, 35));
         lblVenta.setForeground(new Color(20, 20, 20));
@@ -153,7 +201,17 @@ public class MenuFrame extends JPanel {
     }
 
     private JButton crearBotonCircularCerrar() {
-        JButton b = new JButton("✕");
+        JButton b = new JButton("'Icono<----' Salir") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
         b.setFont(new Font("SansSerif", Font.BOLD, 40));
         b.setForeground(new Color(70, 70, 70));
         b.setBackground(new Color(210, 210, 210));
@@ -161,8 +219,8 @@ public class MenuFrame extends JPanel {
         b.setBorderPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         b.setContentAreaFilled(false);
-        b.setPreferredSize(new Dimension(48, 48));
-        b.setMaximumSize(new Dimension(48, 48));
+        b.setPreferredSize(new Dimension(240, 48));
+        b.setMaximumSize(new Dimension(240, 48));
 
         b.addMouseListener(new MouseAdapter() {
             @Override
