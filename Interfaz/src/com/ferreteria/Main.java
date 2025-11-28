@@ -2,20 +2,11 @@ package com.ferreteria;
 
 import com.ferreteria.controller.ControladorLogin;
 import com.ferreteria.database.DatabaseConnection;
-// import com.ferreteria.model.Venta;
 import com.ferreteria.view.LoginFrame;
-import com.ferreteria.view.ResumenFacturaFrame;
-import com.ferreteria.view.VentaFrame;
 import javax.swing.*;
-// import java.awt.*;
 
 /**
  * Clase principal - Arranca la aplicación
- * 
- * @author TÚ (Frontend) y Alex (Backend)
- * 
- *         Este es el punto de entrada. Crea las vistas, controladores y los
- *         conecta.
  */
 public class Main {
 
@@ -36,8 +27,6 @@ public class Main {
 
     /**
      * Verifica si hay conexión a la base de datos
-     * Si no hay, muestra advertencia pero la app sigue funcionando con datos
-     * hardcodeados
      */
     private static void verificarConexionBD() {
         System.out.println("========================================");
@@ -60,29 +49,20 @@ public class Main {
      * Inicializa la aplicación creando el FrameBase con LoginFrame
      */
     private static void iniciarAplicacion() {
-        // Crear ventana principal (tu FrameBase existente)
+        // Crear ventana principal
         FrameBase frameBase = new FrameBase("Ferretería El Polaco - Sistema de Ventas");
 
-        // Crear vistas de la aplicación
-        // login, venta, resumen factura
+        // Crear vista de login
         LoginFrame vistaLogin = new LoginFrame();
-        // VentaFrame vistaVenta = new VentaFrame();
-        // ResumenFacturaFrame vistaResumen = new ResumenFacturaFrame();
 
-        // Crear controlador y conectarlo con la vista
-        ControladorLogin controladorLogin = new ControladorLogin(vistaLogin);
+        // Crear controlador y conectarlo con la vista Y el frameBase
+        ControladorLogin controladorLogin = new ControladorLogin(vistaLogin, frameBase);
         vistaLogin.setControlador(controladorLogin);
 
-        // Mostrar vistas en el FrameBase
-        // frameBase.setContenido(vistaVenta);
+        // Mostrar login en el FrameBase
         frameBase.setContenido(vistaLogin);
-        // frameBase.setContenido(vistaResumen);
 
         System.out.println("✓ Aplicación iniciada correctamente");
         System.out.println("  Esperando autenticación...");
     }
 }
-
-// NOTA: Necesitas mover tu FrameBase.java a este paquete o importarlo
-// correctamente
-// Si está en la raíz de src/, muévelo a com/ferreteria/view/FrameBase.java

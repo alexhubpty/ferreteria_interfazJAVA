@@ -1,27 +1,27 @@
 package com.ferreteria.controller;
 
+import com.ferreteria.FrameBase;
 import com.ferreteria.model.Usuario;
 import com.ferreteria.service.AutenticacionService;
 import com.ferreteria.view.LoginFrame;
+import com.ferreteria.view.MenuFrame;
 import javax.swing.JOptionPane;
 
 /**
  * Controlador para la pantalla de Login
  * 
  * @author TÚ (Frontend)
- * 
- *         Este controlador conecta la vista (LoginFrame) con la lógica de
- *         negocio (AutenticacionService).
- *         NO toca la base de datos directamente, eso lo hace Alex en su capa.
  */
 public class ControladorLogin {
 
     private LoginFrame vista;
     private AutenticacionService servicioAuth;
     private Usuario usuarioActual;
+    private FrameBase frameBase; // ← NUEVO: referencia al frame principal
 
-    public ControladorLogin(LoginFrame vista) {
+    public ControladorLogin(LoginFrame vista, FrameBase frameBase) {
         this.vista = vista;
+        this.frameBase = frameBase; // ← NUEVO
         this.servicioAuth = new AutenticacionService();
         this.usuarioActual = null;
     }
@@ -40,10 +40,10 @@ public class ControladorLogin {
             return;
         }
 
-        // Mostrar indicador de carga (opcional)
+        // Mostrar indicador de carga
         vista.setLoginEnProceso(true);
 
-        // Llamar al servicio de autenticación (esto lo hace Alex)
+        // Llamar al servicio de autenticación
         Usuario usuario = servicioAuth.validarCredenciales(username, password);
 
         vista.setLoginEnProceso(false);
@@ -53,18 +53,25 @@ public class ControladorLogin {
             this.usuarioActual = usuario;
             vista.mostrarMensaje("¡Bienvenido " + usuario.getNombreCompleto() + "!");
 
-            // TODO FELIX: Aquí abrirías la siguiente ventana (MenuPrincipal o Dashboard)
-            // Por ejemplo:
-            // new MenuPrincipalFrame(usuario).setVisible(true);
-            // vista.cerrarVentana();
-
             System.out.println("✓ Usuario autenticado: " + usuario);
+
+            // ← NUEVO: Navegar al menú principal
+            navegarAlMenu();
 
         } else {
             // Login fallido
             vista.mostrarError("Usuario o contraseña incorrectos");
             vista.limpiarCampos();
         }
+    }
+
+    /**
+     * Navega al menú principal después del login exitoso
+     */
+    private void navegarAlMenu() {
+        MenuFrame menuFrame = new MenuFrame();
+        menuFrame.setControlador(this); // Le pasamos el mismo controlador
+        frameBase.setContenido(menuFrame);
     }
 
     /**
