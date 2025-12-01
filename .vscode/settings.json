@@ -1,3 +1,9 @@
 {
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.project.outputPath": "bin",
+    "java.project.sourcePaths": [
+        "Interfaz/src"
+    ],
+    "java.project.referencedLibraries": [],
+    "java.compile.nullAnalysis.mode": "disabled"
 }

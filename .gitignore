@@ -4,6 +4,7 @@
 **/dist/
 **/build/
 **/build-impl.xml
+/bin/
 
 # === Compilados ===
 *.class
