@@ -1,33 +1,31 @@
 package com.ferreteria.controller;
 
-import javax.swing.JPanel;
 import com.ferreteria.view.MenuFrame;
+import javax.swing.JPanel;
 
-/**
- * Controlador de navegación entre vistas dentro de MenuFrame.
- */
 public class ControladorNavegacion {
-    private final MenuFrame menuFrame;
+    private final MenuFrame menu;
+    private JPanel vistaActual;
 
-    public ControladorNavegacion(MenuFrame menuFrame) {
-        this.menuFrame = menuFrame;
+    public ControladorNavegacion(MenuFrame menu) {
+        this.menu = menu;
     }
 
-    // Navega a una vista en el panel derecho
     public void navegarA(JPanel nuevaVista) {
-        if (menuFrame != null && nuevaVista != null) {
-            menuFrame.cambiarContenidoDerecho(nuevaVista);
-        }
+        this.vistaActual = nuevaVista;
+        menu.cambiarContenidoDerecho(nuevaVista);
     }
 
-    // Vuelve al menú principal (casco)
-    public void volverAlMenu() {
-        if (menuFrame != null) {
-            menuFrame.volverAlMenuPrincipal();
-        }
+    public JPanel getVistaActual() {
+        return vistaActual;
     }
 
     public MenuFrame getMenuFrame() {
-        return menuFrame;
+        return menu;
+    }
+
+    public void volverAlMenu() {
+        this.vistaActual = null;
+        menu.volverAlMenuPrincipal();
     }
 }

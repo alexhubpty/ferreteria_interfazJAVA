@@ -7,6 +7,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.ferreteria.controller.ControladorLogin;
 import com.ferreteria.controller.ControladorNavegacion;
+import com.ferreteria.controller.BeforeLeave;
 import com.ferreteria.util.RoundedPanel;
 import com.ferreteria.util.IconLoader;
 
@@ -55,6 +56,14 @@ public class MenuFrame extends JPanel {
         botonIVentas.addActionListener(e -> abrirInformeFrame());
         botonCrearCuenta.addActionListener(e -> abrirCrearCuentaFrame());
         botonInventario.addActionListener(e -> abrirInventarioFrame());
+
+        botonAccion.addActionListener(e -> {
+            var vista = controladorNav.getVistaActual();
+            if (vista instanceof com.ferreteria.controller.BeforeLeave b && b.onBeforeLeave()) {
+                return; // bloquea navegación en el primer clic si hay datos
+            }
+            controladorNav.volverAlMenu();
+        });
     }
 
     private void initComponents() {
@@ -355,8 +364,16 @@ public class MenuFrame extends JPanel {
 
     private void abrirVentaFrame() {
         VentaFrame venta = new VentaFrame(controladorNav);
-        cambiarContenidoDerecho(venta);
-        cambiarBotonAccion("Nuevo", "icono12.png", "icono11.png", e -> volverAlMenuPrincipal());
+        controladorNav.navegarA(venta);
+
+        // Configurar botón con lógica de doble clic
+        cambiarBotonAccion("Atrás", "icono12.png", "icono11.png", e -> {
+            JPanel vista = controladorNav.getVistaActual();
+            if (vista instanceof BeforeLeave bl && bl.onBeforeLeave()) {
+                return; // Primer clic: bloqueado, solo limpia
+            }
+            controladorNav.volverAlMenu(); // Segundo clic: salir
+        });
     }
 
     private void abrirNominaFrame() {
@@ -381,5 +398,10 @@ public class MenuFrame extends JPanel {
         InventarioFrame inventario = new InventarioFrame(controladorNav);
         cambiarContenidoDerecho(inventario);
         cambiarBotonAccion("Atrás", "icono12.png", "icono11.png", e -> volverAlMenuPrincipal());
+    }
+
+    // Getter para el botón de acción
+    public JButton getBotonAccion() {
+        return botonAccion;
     }
 }

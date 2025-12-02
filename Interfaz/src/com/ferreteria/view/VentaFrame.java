@@ -1,14 +1,28 @@
 package com.ferreteria.view;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
+import com.ferreteria.controller.BeforeLeave;
 import com.ferreteria.controller.ControladorNavegacion;
+import com.ferreteria.controller.VentaController;
 import com.ferreteria.util.RoundedPanel;
 
-public class VentaFrame extends JPanel {
-  private ControladorNavegacion navegacion;
+public class VentaFrame extends JPanel implements BeforeLeave {
+  private final ControladorNavegacion navegacion;
+  private final VentaController controlador = new VentaController();
+
+  // Campos para limpiar
+  private final List<JTextField> camposCantidad = new ArrayList<>();
+  private final List<JTextField> camposTotales = new ArrayList<>();
+
+  // Bandera para doble clic
+  private boolean salidaArmada = false;
 
   public VentaFrame(ControladorNavegacion navegacion) {
     this.navegacion = navegacion;
@@ -17,200 +31,225 @@ public class VentaFrame extends JPanel {
     initComponents();
   }
 
+  @Override
+  public boolean onBeforeLeave() {
+    // Si hay datos y aún no se armó la salida
+    if (!salidaArmada && hayDatos()) {
+      limpiarCampos();
+      salidaArmada = true;
+      return true; // Bloquear salida (primer clic)
+    }
+    return false; // Permitir salida (segundo clic)
+  }
+
+  private boolean hayDatos() {
+    for (JTextField tf : camposCantidad) {
+      String texto = tf.getText().trim();
+      if (!texto.isEmpty() && !texto.equals("0")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void limpiarCampos() {
+    for (int i = 0; i < camposCantidad.size(); i++) {
+      camposCantidad.get(i).setText("");
+      camposTotales.get(i).setText("$ 0.00");
+    }
+  }
+
   private void initComponents() {
-    // Margen de 20px en todos los lados
     JPanel container = new JPanel(new BorderLayout());
     container.setOpaque(false);
     container.setBorder(new EmptyBorder(20, 20, 20, 20));
     add(container, BorderLayout.CENTER);
 
-    // Panel rojo que ocupa todo el espacio disponible después del margen
-    RoundedPanel panelRojo = new RoundedPanel(84, new Color(186, 32, 36));
-    panelRojo.setLayout(new GridBagLayout());
-    panelRojo.setOpaque(true);
-    panelRojo.setBorder(new EmptyBorder(40, 50, 40, 50)); // Padding interno generoso
+    RoundedPanel panel = new RoundedPanel(84, new Color(186, 32, 36));
+    panel.setLayout(new GridBagLayout());
+    panel.setOpaque(true);
+    panel.setBorder(new EmptyBorder(40, 50, 40, 50));
+    container.add(panel, BorderLayout.CENTER);
 
-    container.add(panelRojo, BorderLayout.CENTER);
+    GridBagConstraints g = new GridBagConstraints();
+    g.insets = new Insets(16, 16, 16, 16);
+    g.fill = GridBagConstraints.HORIZONTAL;
 
-    GridBagConstraints rg = new GridBagConstraints();
-    rg.insets = new Insets(16, 16, 16, 16); // Más espacio entre elementos
-    rg.fill = GridBagConstraints.HORIZONTAL;
-    rg.anchor = GridBagConstraints.EAST;
+    // Título
+    g.gridx = 0;
+    g.gridy = 0;
+    g.gridwidth = 4;
+    g.anchor = GridBagConstraints.CENTER;
+    panel.add(crearTitulo("Nueva Venta", "icono02.png"), g);
 
-    // Título con icono
-    rg.gridx = 0;
-    rg.gridy = 0;
-    rg.gridwidth = 4;
-    JPanel titulo = crearTituloPanel("Nueva Venta", "icono02.png");
-    panelRojo.add(titulo, rg);
+    g.gridy = 1;
+    panel.add(Box.createVerticalStrut(20), g);
 
-    // Espacio entre título y encabezados
-    rg.gridy = 1;
-    panelRojo.add(Box.createVerticalStrut(30), rg);
+    // Encabezados
+    g.gridy = 2;
+    g.gridwidth = 1;
+    g.anchor = GridBagConstraints.WEST;
+    g.gridx = 0;
+    panel.add(crearEtiqueta("Item"), g);
+    g.gridx = 1;
+    panel.add(crearEtiqueta("Unitario"), g);
+    g.gridx = 2;
+    panel.add(crearEtiqueta("Cantidad"), g);
+    g.gridx = 3;
+    panel.add(crearEtiqueta("Precio"), g);
 
-    // Encabezados (más grandes)
-    rg.gridy = 2;
-    rg.gridwidth = 1;
-    rg.anchor = GridBagConstraints.WEST;
+    // Productos
+    agregarFila(panel, 3, "Bloque 6");
+    agregarFila(panel, 4, "Bloque 4");
+    agregarFila(panel, 5, "Cemento");
+    agregarFila(panel, 6, "Arena");
 
-    rg.gridx = 0;
-    panelRojo.add(etiquetaHeader("Item", Color.WHITE), rg);
-    rg.gridx = 1;
-    panelRojo.add(etiquetaHeader("Unitario", Color.WHITE), rg);
-    rg.gridx = 2;
-    panelRojo.add(etiquetaHeader("Cantidad", Color.WHITE), rg);
-    rg.gridx = 3;
-    panelRojo.add(etiquetaHeader("Precio", Color.WHITE), rg);
+    // Botón procesar
+    g.gridy = 7;
+    g.gridx = 0;
+    g.gridwidth = 4;
+    g.anchor = GridBagConstraints.CENTER;
+    g.fill = GridBagConstraints.NONE;
+    panel.add(Box.createVerticalStrut(20), g);
 
-    // Filas de productos (campos más grandes)
-    agregarFila(panelRojo, 3, "Bloque 6", "$", "0.75", "18280", "$ 13332.90");
-    agregarFila(panelRojo, 4, "Bloque 4", "$", "0.75", "18280", "$ 13332.90");
-    agregarFila(panelRojo, 5, "Cemento", "$", "10.00", "18280", "$ 13332.90");
-    agregarFila(panelRojo, 6, "Arena", "$", "15.00", "18280", "$ 13332.90");
-
-    // Espacio antes del botón
-    rg.gridy = 7;
-    rg.gridx = 0;
-    rg.gridwidth = 4;
-    panelRojo.add(Box.createVerticalStrut(20), rg);
-
-    // Botón procesar (más grande)
-    rg.gridy = 8;
-    rg.fill = GridBagConstraints.NONE;
-    rg.anchor = GridBagConstraints.CENTER;
-    JButton btnProcesar = crearBotonProcesar();
-    panelRojo.add(btnProcesar, rg);
+    g.gridy = 8;
+    panel.add(crearBotonProcesar(), g);
   }
 
-  private JLabel etiquetaHeader(String txt, Color color) {
-    JLabel l = new JLabel(txt);
-    l.setFont(new Font("SansSerif", Font.BOLD, 32)); // ← Más grande (antes 24)
-    l.setForeground(color);
-    return l;
-  }
+  private void agregarFila(JPanel panel, int row, String producto) {
+    GridBagConstraints g = new GridBagConstraints();
+    g.insets = new Insets(12, 16, 12, 16);
+    g.fill = GridBagConstraints.HORIZONTAL;
+    g.anchor = GridBagConstraints.WEST;
+    g.gridy = row;
 
-  private void agregarFila(JPanel panel, int row, String item, String currency, String unitPrice,
-      String qty, String total) {
-    GridBagConstraints rg = new GridBagConstraints();
-    rg.insets = new Insets(18, 16, 18, 16); // ← Más espacio vertical entre filas
-    rg.fill = GridBagConstraints.HORIZONTAL;
-    rg.anchor = GridBagConstraints.WEST;
-    rg.gridy = row;
+    // Nombre producto
+    g.gridx = 0;
+    JLabel nombre = new JLabel(producto);
+    nombre.setFont(new Font("SansSerif", Font.BOLD, 32));
+    nombre.setForeground(Color.WHITE);
+    panel.add(nombre, g);
 
-    // Item (más grande)
-    rg.gridx = 0;
-    JLabel lItem = new JLabel(item);
-    lItem.setFont(new Font("SansSerif", Font.BOLD, 38)); // ← Más grande (antes 30)
-    lItem.setForeground(Color.WHITE);
-    panel.add(lItem, rg);
+    // Precio unitario
+    g.gridx = 1;
+    String precio = controlador.getPrecio(producto).toPlainString();
+    panel.add(crearCampoFijo("$ " + precio, 140), g);
 
-    // Unitario (campo más grande)
-    rg.gridx = 1;
-    panel.add(campoMonedaFijo(unitPrice, 160), rg); // ← Más ancho (antes 110)
+    // Cantidad
+    g.gridx = 2;
+    JTextField tfCant = crearCampoEditable("", 120);
+    panel.add(tfCant, g);
+    camposCantidad.add(tfCant);
 
-    // Cantidad (campo más grande)
-    rg.gridx = 2;
-    JTextField tfCant = crearCampo(qty, 160); // ← Más ancho (antes 110)
-    panel.add(tfCant, rg);
+    // Total
+    g.gridx = 3;
+    JTextField tfTotal = crearCampoFijo("$ 0.00", 160);
+    panel.add(tfTotal, g);
+    camposTotales.add(tfTotal);
 
-    // Precio total (campo más grande)
-    rg.gridx = 3;
-    JTextField tfTotal = crearCampo(total, 200); // ← Más ancho (antes 150)
-    tfTotal.setEditable(false);
-    panel.add(tfTotal, rg);
-  }
-
-  private JTextField campoMonedaFijo(String valor, int width) {
-    JTextField tf = new JTextField(valor) {
-      @Override
-      protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Pintar fondo redondeado
-        g2.setColor(getBackground());
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20); // ← Bordes redondeados
-
-        // Pintar borde redondeado
-        g2.setColor(new Color(160, 160, 160));
-        g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
-
-        g2.dispose();
-        super.paintComponent(g);
-
-        // Pintar símbolo $ después del texto
-        Graphics2D g3 = (Graphics2D) g.create();
-        g3.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g3.setColor(new Color(30, 30, 30));
-        g3.setFont(getFont().deriveFont(Font.BOLD, 32f)); // ← Símbolo $ más grande
-        FontMetrics fm = g3.getFontMetrics();
-        int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
-        g3.drawString("$", 14, y);
-        g3.dispose();
+    // Listener para recalcular y desarmar salida
+    tfCant.getDocument().addDocumentListener(new DocumentListener() {
+      private void actualizar() {
+        salidaArmada = false; // Desarmar si escribe de nuevo
+        try {
+          int cant = tfCant.getText().trim().isEmpty() ? 0
+              : Integer.parseInt(tfCant.getText().trim());
+          String total = controlador.calcularTotal(producto, cant).toPlainString();
+          tfTotal.setText("$ " + total);
+        } catch (NumberFormatException ex) {
+          tfTotal.setText("$ 0.00");
+        }
       }
 
       @Override
-      protected void paintBorder(Graphics g) {
-        // No pintar borde por defecto
+      public void insertUpdate(DocumentEvent e) {
+        actualizar();
       }
-    };
 
-    tf.setPreferredSize(new Dimension(width, 60));
-    tf.setMinimumSize(new Dimension(width, 60));
-    tf.setFont(new Font("SansSerif", Font.PLAIN, 32)); // ← Números más grandes (antes 26)
-    tf.setForeground(new Color(30, 30, 30));
-    tf.setBackground(new Color(230, 230, 230));
-    tf.setBorder(new EmptyBorder(10, 32, 10, 14)); // ← Sin borde estándar, solo padding
-    tf.setOpaque(false); // ← Importante: dejar que paintComponent maneje el fondo
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        actualizar();
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        actualizar();
+      }
+    });
+  }
+
+  // ========== Componentes UI ==========
+
+  private JLabel crearEtiqueta(String texto) {
+    JLabel lbl = new JLabel(texto);
+    lbl.setFont(new Font("SansSerif", Font.BOLD, 28));
+    lbl.setForeground(Color.WHITE);
+    return lbl;
+  }
+
+  private JTextField crearCampoFijo(String texto, int ancho) {
+    JTextField tf = crearCampoBase(texto, ancho);
     tf.setEditable(false);
-    tf.setText(valor);
     return tf;
   }
 
-  private JTextField crearCampo(String valor, int width) {
-    JTextField tf = new JTextField(valor) {
+  private JTextField crearCampoEditable(String texto, int ancho) {
+    return crearCampoBase(texto, ancho);
+  }
+
+  private JTextField crearCampoBase(String texto, int ancho) {
+    JTextField tf = new JTextField(texto) {
       @Override
       protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Pintar fondo redondeado
         g2.setColor(getBackground());
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20); // ← Bordes redondeados
-
-        // Pintar borde redondeado
-        g2.setColor(new Color(160, 160, 160));
-        g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
-
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
         g2.dispose();
         super.paintComponent(g);
       }
 
       @Override
       protected void paintBorder(Graphics g) {
-        // No pintar borde por defecto
       }
     };
-
-    tf.setPreferredSize(new Dimension(width, 60));
-    tf.setMinimumSize(new Dimension(width, 60));
-    tf.setFont(new Font("SansSerif", Font.PLAIN, 32)); // ← Números más grandes (antes 26)
+    tf.setPreferredSize(new Dimension(ancho, 50));
+    tf.setFont(new Font("SansSerif", Font.PLAIN, 26));
     tf.setForeground(new Color(30, 30, 30));
     tf.setBackground(new Color(230, 230, 230));
-    tf.setBorder(new EmptyBorder(10, 14, 10, 14)); // ← Sin borde estándar, solo padding
-    tf.setOpaque(false); // ← Importante: dejar que paintComponent maneje el fondo
+    tf.setBorder(new EmptyBorder(8, 12, 8, 12));
+    tf.setOpaque(false);
     tf.setHorizontalAlignment(JTextField.CENTER);
     return tf;
   }
 
+  private JPanel crearTitulo(String texto, String icono) {
+    JPanel header = new JPanel();
+    header.setOpaque(false);
+    header.setLayout(new BoxLayout(header, BoxLayout.X_AXIS));
+
+    ImageIcon icon = com.ferreteria.util.IconLoader.cargarIcono(icono);
+    if (icon != null) {
+      header.add(new JLabel(icon));
+      header.add(Box.createHorizontalStrut(12));
+    }
+
+    JLabel titulo = new JLabel(texto);
+    titulo.setFont(new Font("SansSerif", Font.BOLD, 42));
+    titulo.setForeground(Color.BLACK);
+    header.add(titulo);
+
+    return header;
+  }
+
   private JButton crearBotonProcesar() {
-    JButton b = new JButton("Procesar") {
+    JButton btn = new JButton("Procesar") {
       @Override
       protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(getBackground());
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 32, 32);
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
         g2.dispose();
         super.paintComponent(g);
       }
@@ -219,70 +258,25 @@ public class VentaFrame extends JPanel {
       protected void paintBorder(Graphics g) {
       }
     };
-    b.setFont(new Font("SansSerif", Font.BOLD, 32));
-    b.setForeground(Color.WHITE);
-    b.setBackground(new Color(50, 50, 50));
-    b.setFocusPainted(false);
-    b.setContentAreaFilled(false);
-    b.setBorder(BorderFactory.createEmptyBorder(18, 60, 18, 60));
-    b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    btn.setFont(new Font("SansSerif", Font.BOLD, 28));
+    btn.setForeground(Color.WHITE);
+    btn.setBackground(new Color(50, 50, 50));
+    btn.setFocusPainted(false);
+    btn.setContentAreaFilled(false);
+    btn.setBorder(BorderFactory.createEmptyBorder(14, 50, 14, 50));
+    btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-    // Hover effect (igual que el botón Acceder)
-    b.addMouseListener(new java.awt.event.MouseAdapter() {
-      @Override
-      public void mouseEntered(java.awt.event.MouseEvent e) {
-        b.setBackground(new Color(90, 120, 90)); // Verde al pasar el mouse
-        b.repaint();
+    btn.addActionListener(e -> {
+      if (!controlador.tieneProductos()) {
+        JOptionPane.showMessageDialog(this, "Ingrese al menos un producto", "Aviso", JOptionPane.WARNING_MESSAGE);
+        return;
       }
-
-      @Override
-      public void mouseExited(java.awt.event.MouseEvent e) {
-        b.setBackground(new Color(50, 50, 50)); // Vuelve a gris oscuro
-        b.repaint();
-      }
+      // Procesar y navegar a resumen
+      com.ferreteria.model.Venta venta = controlador.procesarVenta();
+      ResumenFacturaFrame resumen = new ResumenFacturaFrame(navegacion, venta);
+      navegacion.navegarA(resumen);
     });
 
-    // Acción: navegar a ResumenFacturaFrame
-    b.addActionListener(e -> {
-      if (navegacion != null) {
-        ResumenFacturaFrame resumen = new ResumenFacturaFrame(navegacion);
-        navegacion.navegarA(resumen);
-
-        // Cambiar botón a "Atrás" para volver a VentaFrame (no al menú principal)
-        MenuFrame menuFrame = navegacion.getMenuFrame();
-        if (menuFrame != null) {
-          menuFrame.actualizarBotonAccion("Atrás", "icono12.png", "icono11.png", ev -> {
-            VentaFrame nuevaVenta = new VentaFrame(navegacion);
-            navegacion.navegarA(nuevaVenta);
-            menuFrame.actualizarBotonAccion("Nuevo", "icono12.png", "icono11.png", evt -> {
-              navegacion.volverAlMenu();
-            });
-          });
-        }
-      }
-    });
-
-    return b;
-  }
-
-  private JPanel crearTituloPanel(String texto, String iconoArchivo) {
-    JPanel header = new JPanel();
-    header.setOpaque(false);
-    header.setLayout(new BoxLayout(header, BoxLayout.X_AXIS));
-
-    ImageIcon icon = com.ferreteria.util.IconLoader.cargarIcono(iconoArchivo); // ← Icono más grande
-    JLabel icono = new JLabel(icon);
-
-    JLabel titulo = new JLabel(texto);
-    titulo.setFont(new Font("SansSerif", Font.BOLD, 48)); // ← Más grande (antes 36)
-    titulo.setForeground(Color.BLACK);
-
-    header.add(Box.createHorizontalGlue());
-    header.add(icono);
-    header.add(Box.createHorizontalStrut(16));
-    header.add(titulo);
-    header.add(Box.createHorizontalGlue());
-
-    return header;
+    return btn;
   }
 }

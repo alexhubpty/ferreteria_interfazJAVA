@@ -1,40 +1,58 @@
 package com.ferreteria.view;
 
 import java.awt.*;
+import java.math.BigDecimal;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import com.ferreteria.controller.ControladorNavegacion;
+import com.ferreteria.model.Venta;
+import com.ferreteria.service.VentaService;
 import com.ferreteria.util.RoundedPanel;
 
 public class ResumenFacturaFrame extends JPanel {
   private ControladorNavegacion navegacion;
+  private Venta venta;
+  private VentaService servicio = new VentaService();
+
   private JLabel lblSubtotal;
   private JLabel lblITBMS;
   private JLabel lblTotal;
   private JTextField tfPago;
   private JLabel lblCambio;
 
-  public ResumenFacturaFrame(ControladorNavegacion navegacion) {
+  // Estado del botón
+  private boolean ventaProcesada = false;
+
+  public ResumenFacturaFrame(ControladorNavegacion navegacion, Venta venta) {
     this.navegacion = navegacion;
+    this.venta = venta;
     setLayout(new BorderLayout());
     setOpaque(false);
     initComponents();
+    mostrarDatos();
+  }
+
+  private void mostrarDatos() {
+    lblSubtotal.setText("$ " + venta.getSubtotal().toPlainString());
+    lblITBMS.setText("$ " + venta.getItbms().toPlainString());
+    lblTotal.setText("$ " + venta.getTotal().toPlainString());
+    tfPago.setText("");
+    lblCambio.setText("$ 0.00");
   }
 
   private void initComponents() {
-    // Margen de 20px en todos los lados
     JPanel container = new JPanel(new BorderLayout());
     container.setOpaque(false);
     container.setBorder(new EmptyBorder(20, 20, 20, 20));
     add(container, BorderLayout.CENTER);
 
-    // Panel rojo que ocupa todo el espacio disponible después del margen
     RoundedPanel panelRojo = new RoundedPanel(84, new Color(186, 32, 36));
     panelRojo.setLayout(new GridBagLayout());
     panelRojo.setOpaque(true);
     panelRojo.setBorder(new EmptyBorder(40, 50, 40, 50));
-
     container.add(panelRojo, BorderLayout.CENTER);
 
     GridBagConstraints rg = new GridBagConstraints();
@@ -42,14 +60,12 @@ public class ResumenFacturaFrame extends JPanel {
     rg.fill = GridBagConstraints.HORIZONTAL;
     rg.anchor = GridBagConstraints.CENTER;
 
-    // Título con icono
+    // Título
     rg.gridx = 0;
     rg.gridy = 0;
     rg.gridwidth = 2;
-    JPanel titulo = crearTituloPanel("Resumen de Factura", "icono02.png");
-    panelRojo.add(titulo, rg);
+    panelRojo.add(crearTituloPanel("Resumen de Factura", "icono02.png"), rg);
 
-    // Espacio entre título y contenido
     rg.gridy = 1;
     panelRojo.add(Box.createVerticalStrut(40), rg);
 
@@ -59,36 +75,32 @@ public class ResumenFacturaFrame extends JPanel {
     rg.gridx = 0;
     rg.anchor = GridBagConstraints.EAST;
     panelRojo.add(etiquetaLabel("Subtotal"), rg);
-
     rg.gridx = 1;
     rg.anchor = GridBagConstraints.WEST;
-    lblSubtotal = crearCampoValor("$ 12332123.32");
+    lblSubtotal = crearCampoValor("$ 0.00");
     panelRojo.add(lblSubtotal, rg);
 
-    // ITBMS 7%
+    // ITBMS
     rg.gridy = 3;
     rg.gridx = 0;
     rg.anchor = GridBagConstraints.EAST;
     panelRojo.add(etiquetaLabel("ITBMS 7%"), rg);
-
     rg.gridx = 1;
     rg.anchor = GridBagConstraints.WEST;
-    lblITBMS = crearCampoValor("$ 12332123.32");
+    lblITBMS = crearCampoValor("$ 0.00");
     panelRojo.add(lblITBMS, rg);
 
-    // Espacio antes de Total a Pagar
     rg.gridy = 4;
     rg.gridx = 0;
     rg.gridwidth = 2;
     panelRojo.add(Box.createVerticalStrut(20), rg);
 
-    // Total a Pagar (más grande, sin campo)
+    // Total
     rg.gridy = 5;
-    rg.gridx = 0;
     rg.gridwidth = 1;
+    rg.gridx = 0;
     rg.anchor = GridBagConstraints.EAST;
     panelRojo.add(etiquetaLabelGrande("Total a Pagar"), rg);
-
     rg.gridx = 1;
     rg.anchor = GridBagConstraints.WEST;
     lblTotal = new JLabel("$ 0.00");
@@ -96,30 +108,28 @@ public class ResumenFacturaFrame extends JPanel {
     lblTotal.setForeground(Color.BLACK);
     panelRojo.add(lblTotal, rg);
 
-    // Espacio después de Total
     rg.gridy = 6;
     rg.gridx = 0;
     rg.gridwidth = 2;
     panelRojo.add(Box.createVerticalStrut(20), rg);
 
-    // Pago (campo editable)
+    // Pago
     rg.gridy = 7;
-    rg.gridx = 0;
     rg.gridwidth = 1;
+    rg.gridx = 0;
     rg.anchor = GridBagConstraints.EAST;
     panelRojo.add(etiquetaLabel("Pago"), rg);
-
     rg.gridx = 1;
     rg.anchor = GridBagConstraints.WEST;
-    tfPago = crearCampoEditable("$ 12332123.32");
+    tfPago = crearCampoEditable("");
     panelRojo.add(tfPago, rg);
 
-    // Cambio
+    // Cambio (sin DocumentListener, se calcula solo al presionar Procesar)
     rg.gridy = 8;
+    rg.gridwidth = 1;
     rg.gridx = 0;
     rg.anchor = GridBagConstraints.EAST;
     panelRojo.add(etiquetaLabelGrande("Cambio"), rg);
-
     rg.gridx = 1;
     rg.anchor = GridBagConstraints.WEST;
     lblCambio = new JLabel("$ 0.00");
@@ -127,7 +137,6 @@ public class ResumenFacturaFrame extends JPanel {
     lblCambio.setForeground(Color.BLACK);
     panelRojo.add(lblCambio, rg);
 
-    // Espacio antes del botón
     rg.gridy = 9;
     rg.gridx = 0;
     rg.gridwidth = 2;
@@ -137,8 +146,7 @@ public class ResumenFacturaFrame extends JPanel {
     rg.gridy = 10;
     rg.fill = GridBagConstraints.NONE;
     rg.anchor = GridBagConstraints.CENTER;
-    JButton btnCerrar = crearBotonCerrar();
-    panelRojo.add(btnCerrar, rg);
+    panelRojo.add(crearBotonCerrar(), rg);
   }
 
   private JLabel etiquetaLabel(String texto) {
@@ -161,20 +169,14 @@ public class ResumenFacturaFrame extends JPanel {
       protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Fondo redondeado
         g2.setColor(new Color(230, 230, 230));
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
-
-        // Borde redondeado
         g2.setColor(new Color(160, 160, 160));
         g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
-
         g2.dispose();
         super.paintComponent(g);
       }
     };
-
     campo.setPreferredSize(new Dimension(280, 60));
     campo.setMinimumSize(new Dimension(280, 60));
     campo.setFont(new Font("SansSerif", Font.PLAIN, 32));
@@ -191,15 +193,10 @@ public class ResumenFacturaFrame extends JPanel {
       protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Fondo redondeado
         g2.setColor(getBackground());
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
-
-        // Borde redondeado
         g2.setColor(new Color(160, 160, 160));
         g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
-
         g2.dispose();
         super.paintComponent(g);
       }
@@ -208,7 +205,6 @@ public class ResumenFacturaFrame extends JPanel {
       protected void paintBorder(Graphics g) {
       }
     };
-
     tf.setPreferredSize(new Dimension(280, 60));
     tf.setMinimumSize(new Dimension(280, 60));
     tf.setFont(new Font("SansSerif", Font.PLAIN, 32));
@@ -221,7 +217,7 @@ public class ResumenFacturaFrame extends JPanel {
   }
 
   private JButton crearBotonCerrar() {
-    JButton b = new JButton("Cerrar") {
+    JButton b = new JButton("Procesar") {
       @Override
       protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
@@ -236,7 +232,6 @@ public class ResumenFacturaFrame extends JPanel {
       protected void paintBorder(Graphics g) {
       }
     };
-
     b.setFont(new Font("SansSerif", Font.BOLD, 32));
     b.setForeground(Color.WHITE);
     b.setBackground(new Color(50, 50, 50));
@@ -244,6 +239,65 @@ public class ResumenFacturaFrame extends JPanel {
     b.setContentAreaFilled(false);
     b.setBorder(BorderFactory.createEmptyBorder(18, 60, 18, 60));
     b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+    b.addActionListener(e -> {
+      // Si ya se procesó, solo cerrar
+      if (ventaProcesada) {
+        navegacion.volverAlMenu();
+        return;
+      }
+
+      // Validar que se ingresó un pago
+      String textoPago = tfPago.getText().trim().replace("$", "").trim();
+      if (textoPago.isEmpty()) {
+        JOptionPane.showMessageDialog(this,
+            "Ingrese el monto del pago",
+            "Pago requerido",
+            JOptionPane.WARNING_MESSAGE);
+        tfPago.requestFocus();
+        return;
+      }
+
+      try {
+        BigDecimal pago = new BigDecimal(textoPago);
+        BigDecimal total = venta.getTotal();
+
+        // Validar que el pago sea suficiente
+        if (pago.compareTo(total) < 0) {
+          BigDecimal faltante = total.subtract(pago);
+          JOptionPane.showMessageDialog(this,
+              "Pago insuficiente. Faltan $" + faltante.toPlainString(),
+              "Pago insuficiente",
+              JOptionPane.ERROR_MESSAGE);
+          tfPago.requestFocus();
+          tfPago.selectAll();
+          return;
+        }
+
+        // Pago válido: calcular cambio y mostrar
+        BigDecimal cambio = servicio.calcularCambio(total, pago);
+        lblCambio.setText("$ " + cambio.toPlainString());
+
+        // Deshabilitar campo de pago
+        tfPago.setEditable(false);
+        tfPago.setBackground(new Color(200, 200, 200));
+
+        // Cambiar botón a "Cerrar"
+        b.setText("Cerrar");
+        ventaProcesada = true;
+
+        // TODO: Guardar venta en BD aquí
+
+      } catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(this,
+            "Ingrese un monto válido",
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+        tfPago.requestFocus();
+        tfPago.selectAll();
+      }
+    });
+
     return b;
   }
 
