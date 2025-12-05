@@ -1,0 +1,29 @@
+package com.ferreteria.view;
+
+import java.awt.*;
+import javax.swing.*;
+import com.ferreteria.controller.ControladorNavegacion;
+
+public class CrearCuentaFrame extends JPanel {
+    @SuppressWarnings("unused")
+    private ControladorNavegacion navegacion;
+
+    public CrearCuentaFrame(ControladorNavegacion navegacion) {
+        this.navegacion = navegacion;
+        setLayout(new BorderLayout());
+        setOpaque(false);
+        initComponents();
+    }
+
+    private void initComponents() {
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        contentPanel.setOpaque(false);
+
+        JLabel titulo = new JLabel("Nueva Cuenta");
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 48));
+        titulo.setForeground(new Color(30, 30, 30));
+
+        contentPanel.add(titulo);
+        add(contentPanel, BorderLayout.CENTER);
+    }
+}
