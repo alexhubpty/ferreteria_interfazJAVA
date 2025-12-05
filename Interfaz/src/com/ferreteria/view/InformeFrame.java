@@ -5,6 +5,7 @@ import javax.swing.*;
 import com.ferreteria.controller.ControladorNavegacion;
 
 public class InformeFrame extends JPanel {
+    @SuppressWarnings("unused")
     private ControladorNavegacion navegacion;
 
     public InformeFrame(ControladorNavegacion navegacion) {

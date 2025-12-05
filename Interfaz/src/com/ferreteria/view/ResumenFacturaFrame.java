@@ -4,9 +4,6 @@ import java.awt.*;
 import java.math.BigDecimal;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
 import com.ferreteria.controller.ControladorNavegacion;
 import com.ferreteria.model.Venta;
 import com.ferreteria.service.VentaService;

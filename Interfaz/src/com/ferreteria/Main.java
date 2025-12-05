@@ -18,6 +18,9 @@ public class Main {
             System.err.println("No se pudo configurar Look and Feel: " + e.getMessage());
         }
 
+        // Inicializar base de datos
+        DatabaseConnection.inicializarDB();
+
         // Verificar conexión a BD (opcional, solo para debug)
         SwingUtilities.invokeLater(() -> {
             verificarConexionBD();
