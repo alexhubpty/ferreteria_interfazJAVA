@@ -47,6 +47,9 @@ public class NominaFrame extends JPanel implements BeforeLeave {
     // Bandera para doble clic en salir
     private boolean salidaArmada = false;
 
+    // Bandera para evitar loops al limpiar campos
+    private boolean limpiandoCampos = false;
+
     public NominaFrame(ControladorNavegacion navegacion) {
         this.navegacion = navegacion;
         setLayout(new BorderLayout());
@@ -257,6 +260,8 @@ public class NominaFrame extends JPanel implements BeforeLeave {
         // Listener del campo nombre
         tfNombre.getDocument().addDocumentListener(new DocumentListener() {
             private void reiniciarTimer() {
+                if (limpiandoCampos)
+                    return;
                 salidaArmada = false;
                 timerBusqueda.restart();
             }
@@ -280,6 +285,8 @@ public class NominaFrame extends JPanel implements BeforeLeave {
         // Listener para horas y salario (desarmar salida)
         DocumentListener desarmarSalida = new DocumentListener() {
             private void desarmar() {
+                if (limpiandoCampos)
+                    return;
                 salidaArmada = false;
             }
 
@@ -304,8 +311,20 @@ public class NominaFrame extends JPanel implements BeforeLeave {
 
     private void buscarYCargarHistorial() {
         String nombre = tfNombre.getText().trim();
+
+        // Limpiar todos los campos al cambiar el nombre
+        limpiandoCampos = true;
+        lblBruto.setText("");
+        lblSeguroSocial.setText("");
+        lblSeguroEducativo.setText("");
+        lblNeto.setText("");
+        tfHoras.setText("");
+        tfSalarioHora.setText("");
+        limpiandoCampos = false;
+
         if (nombre.isEmpty()) {
             limpiarHistorial();
+            actualizarBotonesPaginacion();
             return;
         }
 
@@ -314,6 +333,7 @@ public class NominaFrame extends JPanel implements BeforeLeave {
             cargarHistorial();
         } else {
             limpiarHistorial();
+            actualizarBotonesPaginacion();
         }
     }
 
@@ -344,6 +364,9 @@ public class NominaFrame extends JPanel implements BeforeLeave {
             historialDeducciones.get(i).setText("");
             historialNeto.get(i).setText("");
         }
+        // Deshabilitar botones cuando no hay historial
+        btnPrev.setEnabled(false);
+        btnNext.setEnabled(false);
     }
 
     private void actualizarBotonesPaginacion() {
@@ -627,11 +650,7 @@ public class NominaFrame extends JPanel implements BeforeLeave {
             // Guardar en BD
             boolean guardado = controlador.procesar(nombre, horas, salarioHora);
             if (guardado) {
-                // Limpiar campos editables (excepto nombre)
-                tfHoras.setText("");
-                tfSalarioHora.setText("");
-
-                // Actualizar historial
+                // Actualizar historial (NO limpiar horas ni salario)
                 cargarHistorial();
 
                 JOptionPane.showMessageDialog(this, "Nómina procesada correctamente", "Éxito",
